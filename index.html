@@ -11,20 +11,12 @@
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
             background-color: #f0f4f8;
         }
-        /* Custom scrollbar for better aesthetics */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
         .task-card {
             transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
@@ -32,7 +24,6 @@
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
-        /* Style for the select dropdown */
         .filter-select {
             -webkit-appearance: none;
             -moz-appearance: none;
@@ -43,6 +34,34 @@
             background-size: 1em;
             padding-right: 2rem;
         }
+        /* AI Modal styles */
+        #ai-modal-content h2 {
+            font-size: 1.5rem; /* 24px */
+            font-weight: 700;
+            color: #1f2937; /* gray-800 */
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+        #ai-modal-content h3 {
+            font-size: 1.125rem; /* 18px */
+            font-weight: 600;
+            color: #374151; /* gray-700 */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+        #ai-modal-content p, #ai-modal-content li {
+            color: #4b5563; /* gray-600 */
+            line-height: 1.6;
+        }
+        #ai-modal-content ul {
+            list-style-type: disc;
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        #ai-modal-content strong {
+            color: #111827; /* gray-900 */
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -50,80 +69,86 @@
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
         <header class="mb-8">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">教學中心 - 專案進度儀表板</h1>
                     <p class="text-gray-500 mt-1">即時追蹤所有進行中的專案與任務</p>
                 </div>
-                <div id="last-updated" class="text-sm text-gray-600 bg-white px-3 py-1 rounded-full shadow-sm mt-4 md:mt-0"></div>
+                <div class="flex items-center gap-4">
+                    <button id="ai-button" class="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></svg>
+                        <span>AI 判讀與決策建議</span>
+                    </button>
+                    <div id="last-updated" class="text-sm text-gray-600 bg-white px-3 py-2 rounded-full shadow-sm"></div>
+                </div>
             </div>
         </header>
 
-        <!-- Filters -->
-        <div class="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center bg-white p-4 rounded-lg shadow">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">狀態</label>
-                <div class="flex flex-wrap gap-2">
-                     <button data-filter="all" class="filter-btn-status flex-grow bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">全部</button>
-                     <button data-filter="Overdue" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">逾期</button>
-                     <button data-filter="In Progress" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">進行中</button>
-                     <button data-filter="Not Started" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">未開始</button>
-                     <button data-filter="Completed" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">已完成</button>
+        <!-- Filters and Legend -->
+        <div class="mb-4">
+             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-center bg-white p-4 rounded-lg shadow">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">狀態</label>
+                    <div class="flex flex-wrap gap-2">
+                         <button data-filter="all" class="filter-btn-status flex-grow bg-blue-500 text-white px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">全部</button>
+                         <button data-filter="Overdue" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">逾期</button>
+                         <button data-filter="In Progress" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">進行中</button>
+                         <button data-filter="Not Started" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">未開始</button>
+                         <button data-filter="Completed" class="filter-btn-status flex-grow bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-semibold shadow-sm">已完成</button>
+                    </div>
+                </div>
+                 <div>
+                    <label for="group-filter" class="block text-sm font-medium text-gray-700 mb-1">業務類別</label>
+                    <select id="group-filter" class="filter-select w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="all">所有類別</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="owner-filter" class="block text-sm font-medium text-gray-700 mb-1">負責人</label>
+                    <select id="owner-filter" class="filter-select w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
+                        <option value="all">所有負責人</option>
+                    </select>
+                </div>
+                <div>
+                     <label class="block text-sm font-medium text-gray-700 mb-1 invisible">操作</label>
+                     <button id="reset-filters" class="w-full bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:bg-gray-300">重設篩選</button>
                 </div>
             </div>
-             <div>
-                <label for="group-filter" class="block text-sm font-medium text-gray-700 mb-1">業務類別</label>
-                <select id="group-filter" class="filter-select w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                    <option value="all">所有類別</option>
-                    <!-- Options will be populated by JavaScript -->
-                </select>
-            </div>
-            <div>
-                <label for="owner-filter" class="block text-sm font-medium text-gray-700 mb-1">負責人</label>
-                <select id="owner-filter" class="filter-select w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5">
-                    <option value="all">所有負責人</option>
-                    <!-- Options will be populated by JavaScript -->
-                </select>
-            </div>
-            <div>
-                 <label class="block text-sm font-medium text-gray-700 mb-1 invisible">操作</label>
-                 <button id="reset-filters" class="w-full bg-gray-200 text-gray-800 px-4 py-2.5 rounded-lg text-sm font-semibold shadow-sm hover:bg-gray-300">重設篩選</button>
-            </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="mb-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 px-2">
-            <span class="font-medium text-gray-800">圖例說明：</span>
-            <div class="flex items-center">
-                <span class="h-3 w-3 rounded-full bg-green-500 mr-2 flex-shrink-0"></span>
-                <span>已完成</span>
-            </div>
-            <div class="flex items-center">
-                <span class="h-3 w-3 rounded-full bg-yellow-500 mr-2 flex-shrink-0"></span>
-                <span>進行中</span>
-            </div>
-            <div class="flex items-center">
-                <span class="h-3 w-3 rounded-full bg-blue-500 mr-2 flex-shrink-0"></span>
-                <span>未開始</span>
-            </div>
-            <div class="flex items-center">
-                <span class="h-3 w-3 rounded-full bg-red-500 mr-2 flex-shrink-0"></span>
-                <span>已逾期</span>
+             <div class="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-gray-600 px-2">
+                <span class="font-medium text-gray-800">圖例說明：</span>
+                <div class="flex items-center"><span class="h-3 w-3 rounded-full bg-green-500 mr-2 flex-shrink-0"></span><span>已完成</span></div>
+                <div class="flex items-center"><span class="h-3 w-3 rounded-full bg-yellow-500 mr-2 flex-shrink-0"></span><span>進行中</span></div>
+                <div class="flex items-center"><span class="h-3 w-3 rounded-full bg-blue-500 mr-2 flex-shrink-0"></span><span>未開始</span></div>
+                <div class="flex items-center"><span class="h-3 w-3 rounded-full bg-red-500 mr-2 flex-shrink-0"></span><span>已逾期</span></div>
             </div>
         </div>
 
         <!-- Task Board -->
         <main id="task-board" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <!-- Task cards will be inserted here by JavaScript -->
         </main>
         
         <!-- Empty State -->
         <div id="empty-state" class="hidden text-center py-16">
-             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" />
-            </svg>
+             <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2z" /></svg>
             <h3 class="mt-2 text-sm font-medium text-gray-900">沒有符合條件的任務</h3>
             <p class="mt-1 text-sm text-gray-500">請嘗試調整您的篩選條件或點擊「重設篩選」。</p>
+        </div>
+    </div>
+    
+    <!-- AI Modal -->
+    <div id="ai-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-10 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-xl bg-white">
+            <div class="mt-3 text-center">
+                <div class="flex justify-between items-center mb-4">
+                     <h3 class="text-2xl leading-6 font-bold text-gray-900">AI 判讀與決策建議</h3>
+                     <button id="close-modal-button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center">
+                         <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                     </button>
+                </div>
+                <div id="ai-modal-content" class="mt-2 px-4 py-3 text-left max-h-[75vh] overflow-y-auto">
+                    <!-- AI generated content will be injected here -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -131,36 +156,30 @@
         // --- DATA INITIALIZATION ---
         const TODAY = new Date('2025-06-16');
         const tasks = [
-            { group: '教學中心', task: '114年上半年教學平台滿意度調查', owner: '淑雅', dueDate: '2025-06-30', notes: '上半年底前完成' },
-            { group: '教學中心', task: '院級/PGY導師教學績效考核', owner: '瑞穗, 曉琪, 嬿茹', dueDate: '2025-06-30', notes: '待月底回收陳送院方核定' },
-            { group: '教學中心', task: '「奇美暖心角」畫作送達', owner: '詩芸', dueDate: '2025-06-19', notes: '畫作將送達本院' },
-            { group: '教學中心', task: '【內部訓練】數位賦能系列課程', owner: '依玲', dueDate: '2025-07-29', notes: '系列課程，最終日為7/29' },
-            { group: '教師培育中心', task: '114年度全院主治醫師教學績效評核', owner: '汶秀', dueDate: '2025-12-31', notes: '年度作業' },
-            { group: '教師培育中心', task: '台南市醫師公會聯合旅遊活動', owner: '瑞穗', dueDate: '2025-08-31', notes: '地點：東勢林場' },
-            { group: '教師培育中心', task: '聯合迎新餐會', owner: '瑞穗', dueDate: '2025-11-07', notes: '地點：總理大餐廳' },
-            { group: '教師培育中心', task: '系列演講 (李玲嫻/野崎孝男/陳庭楷)', owner: '淑雅', dueDate: '2025-07-15', notes: '系列演講，最終日為7/15' },
-            { group: '實習醫學生訓練', task: '國立中山大學TMAC評鑑', owner: '淑怡, 昱瑾', dueDate: '2025-12-09', notes: '評鑑日期: 12/09-12/12' },
-            { group: '實習醫學生訓練', task: '中山醫學大學TMAC評鑑', owner: '淑怡, 昱瑾', dueDate: '2025-12-16', notes: '評鑑日期: 12/16-12/19' },
-            { group: '實習醫學生訓練', task: '中山後醫TMAC自評報告回寄', owner: '淑怡, 昱瑾', dueDate: '2025-08-01' },
-            { group: '實習醫學生訓練', task: '實習醫學生報到職前訓', owner: '淑怡, 昱瑾', dueDate: '2025-06-30' },
-            { group: '實習醫學生訓練', task: 'UGY座談暨檢討餐會', owner: '淑怡, 昱瑾', dueDate: '2025-07-03' },
-            { group: '畢業後一般醫學訓練', task: '處理PGY學員轉出入事宜', owner: '曉琪', dueDate: '2025-08-01', notes: '8月起生效'},
-            { group: 'OSCE小組', task: '單領域OSCE教案徵稿', owner: '英云', dueDate: '2025-06-13', notes: '徵稿截止日' },
-            { group: '動物實驗小組', task: '腹腔鏡模擬箱課程', owner: '惠津', dueDate: '2025-06-18' },
-            { group: '動物實驗小組', task: '3D列印血管縫合課程', owner: '惠津', dueDate: '2025-06-26' },
-            { group: '醫事人員教育', task: '導入線上會議紀錄簽核系統', owner: '宜婷, 詩芸', dueDate: '2025-05-31', notes: '5月起導入，視為已完成', status: 'Completed'},
-            { group: '醫事人員教育', task: '與奇美博物館合作之醫學人文教育課程', owner: '宜婷, 詩芸', dueDate: '2025-07-18'},
-            { group: '病歷審查小組', task: '第二季住院病歷行政審查', owner: '迎真, 盟淦', dueDate: '2025-06-30', notes: '4-6月' },
-            { group: '行政表單數位化', task: 'Power Apps 設計教育訓練課程', owner: '依玲, 淑怡, 詩芸', dueDate: '2025-07-12', notes: '分兩天 (7/5, 7/12) 進行' }
+            { id: 't01', group: '教學中心', task: '114年上半年教學平台滿意度調查', owner: '淑雅', dueDate: '2025-06-30', notes: '上半年底前完成' },
+            { id: 't02', group: '教學中心', task: '院級/PGY導師教學績效考核', owner: '瑞穗, 曉琪, 嬿茹', dueDate: '2025-06-30', notes: '待月底回收陳送院方核定' },
+            { id: 't03', group: '教學中心', task: '「奇美暖心角」畫作送達', owner: '詩芸', dueDate: '2025-06-19', notes: '畫作將送達本院' },
+            { id: 't04', group: '教學中心', task: '【內部訓練】數位賦能系列課程', owner: '依玲', dueDate: '2025-07-29', notes: '系列課程，最終日為7/29' },
+            { id: 't05', group: '教師培育中心', task: '114年度全院主治醫師教學績效評核', owner: '汶秀', dueDate: '2025-12-31', notes: '年度作業' },
+            { id: 't06', group: '教師培育中心', task: '台南市醫師公會聯合旅遊活動', owner: '瑞穗', dueDate: '2025-08-31', notes: '地點：東勢林場' },
+            { id: 't07', group: '教師培育中心', task: '聯合迎新餐會', owner: '瑞穗', dueDate: '2025-11-07', notes: '地點：總理大餐廳' },
+            { id: 't08', group: '教師培育中心', task: '系列演講 (李玲嫻/野崎孝男/陳庭楷)', owner: '淑雅', dueDate: '2025-07-15', notes: '系列演講，最終日為7/15' },
+            { id: 't09', group: '實習醫學生訓練', task: '國立中山大學TMAC評鑑', owner: '淑怡, 昱瑾', dueDate: '2025-12-09', notes: '評鑑日期: 12/09-12/12' },
+            { id: 't10', group: '實習醫學生訓練', task: '中山醫學大學TMAC評鑑', owner: '淑怡, 昱瑾', dueDate: '2025-12-16', notes: '評鑑日期: 12/16-12/19' },
+            { id: 't11', group: '實習醫學生訓練', task: '中山後醫TMAC自評報告回寄', owner: '淑怡, 昱瑾', dueDate: '2025-08-01' },
+            { id: 't12', group: '實習醫學生訓練', task: '實習醫學生報到職前訓', owner: '淑怡, 昱瑾', dueDate: '2025-06-30' },
+            { id: 't13', group: '實習醫學生訓練', task: 'UGY座談暨檢討餐會', owner: '淑怡, 昱瑾', dueDate: '2025-07-03' },
+            { id: 't14', group: '畢業後一般醫學訓練', task: '處理PGY學員轉出入事宜', owner: '曉琪', dueDate: '2025-08-01', notes: '8月起生效'},
+            { id: 't15', group: 'OSCE小組', task: '單領域OSCE教案徵稿', owner: '英云', dueDate: '2025-06-13', notes: '徵稿截止日' },
+            { id: 't16', group: '動物實驗小組', task: '腹腔鏡模擬箱課程', owner: '惠津', dueDate: '2025-06-18' },
+            { id: 't17', group: '動物實驗小組', task: '3D列印血管縫合課程', owner: '惠津', dueDate: '2025-06-26' },
+            { id: 't18', group: '醫事人員教育', task: '導入線上會議紀錄簽核系統', owner: '宜婷, 詩芸', dueDate: '2025-05-31', notes: '5月起導入，視為已完成', status: 'Completed'},
+            { id: 't19', group: '醫事人員教育', task: '與奇美博物館合作之醫學人文教育課程', owner: '宜婷, 詩芸', dueDate: '2025-07-18'},
+            { id: 't20', group: '病歷審查小組', task: '第二季住院病歷行政審查', owner: '迎真, 盟淦', dueDate: '2025-06-30', notes: '4-6月' },
+            { id: 't21', group: '行政表單數位化', task: 'Power Apps 設計教育訓練課程', owner: '依玲, 淑怡, 詩芸', dueDate: '2025-07-12', notes: '分兩天 (7/5, 7/12) 進行' }
         ];
 
-        // --- FILTER & UI CONFIGURATION ---
-        let currentFilters = {
-            status: 'all',
-            group: 'all',
-            owner: 'all'
-        };
-
+        let currentFilters = { status: 'all', group: 'all', owner: 'all' };
         const statusConfig = {
             'Overdue': { text: '已逾期', color: 'bg-red-100', textColor: 'text-red-800', dot: 'bg-red-500' },
             'In Progress': { text: '進行中', color: 'bg-yellow-100', textColor: 'text-yellow-800', dot: 'bg-yellow-500' },
@@ -168,13 +187,10 @@
             'Completed': { text: '已完成', color: 'bg-green-100', textColor: 'text-green-800', dot: 'bg-green-500' },
             'No Date': { text: '無日期', color: 'bg-gray-100', textColor: 'text-gray-800', dot: 'bg-gray-400' }
         };
-        
         const groupColors = {};
         const availableColors = ['bg-pink-200', 'bg-purple-200', 'bg-indigo-200', 'bg-teal-200', 'bg-lime-200', 'bg-amber-200', 'bg-cyan-200', 'bg-fuchsia-200'];
         let colorIndex = 0;
 
-        // --- CORE FUNCTIONS ---
-        
         function getStatus(task) {
             if (task.status) return task.status;
             if (!task.dueDate) return 'No Date';
@@ -182,25 +198,20 @@
             dueDate.setHours(23, 59, 59, 999);
             const daysDifference = (dueDate - TODAY) / (1000 * 60 * 60 * 24);
             if (daysDifference < 0) return 'Overdue';
-            if (daysDifference <= 14) return 'In Progress';
+            if (daysDifference <= 30) return 'In Progress'; // Changed to 30 days for more 'In Progress' tasks
             return 'Not Started';
         }
         
-        /**
-         * Renders task cards based on the currentFilters object.
-         */
         function renderTasks() {
             const board = document.getElementById('task-board');
             const emptyState = document.getElementById('empty-state');
             board.innerHTML = '';
-
             const filteredTasks = tasks.filter(task => {
                 const statusMatch = currentFilters.status === 'all' || getStatus(task) === currentFilters.status;
                 const groupMatch = currentFilters.group === 'all' || task.group === currentFilters.group;
                 const ownerMatch = currentFilters.owner === 'all' || task.owner.includes(currentFilters.owner);
                 return statusMatch && groupMatch && ownerMatch;
             });
-
             if (filteredTasks.length === 0) {
                 emptyState.classList.remove('hidden');
                 board.classList.add('hidden');
@@ -208,13 +219,11 @@
                 emptyState.classList.add('hidden');
                 board.classList.remove('hidden');
             }
-            
             filteredTasks.sort((a, b) => {
                 const dateA = a.dueDate ? new Date(a.dueDate) : new Date('9999-12-31');
                 const dateB = b.dueDate ? new Date(b.dueDate) : new Date('9999-12-31');
                 return dateA - dateB;
             });
-
             filteredTasks.forEach(task => {
                 const status = getStatus(task);
                 const config = statusConfig[status];
@@ -223,94 +232,111 @@
                     colorIndex++;
                 }
                 const groupColor = groupColors[task.group];
-                
-                const card = `
-                    <div class="task-card bg-white rounded-lg shadow-md border-l-4 ${config.dot.replace('bg-', 'border-')} p-4 flex flex-col justify-between">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${config.color} ${config.textColor}">
-                                    ${config.text}
-                                </span>
-                                <span class="text-xs font-medium text-gray-600 px-2 py-1 rounded-md ${groupColor}">
-                                    ${task.group}
-                                </span>
-                            </div>
-                            <h3 class="font-bold text-gray-800 text-lg mb-2">${task.task}</h3>
-                            ${task.notes ? `<p class="text-sm text-gray-500 mb-3">${task.notes}</p>` : ''}
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-gray-200">
-                             <div class="flex items-center text-sm text-gray-600 mb-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-70"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zM20 21a8 8 0 1 0-16 0"/></svg>
-                                <strong>負責人：</strong><span class="ml-1">${task.owner}</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-70"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg>
-                                <strong>截止日：</strong><span class="ml-1">${task.dueDate ? task.dueDate.replace(/-/g, '/') : '未指定'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                board.innerHTML += card;
+                const card = `<div id="${task.id}" class="task-card bg-white rounded-lg shadow-md border-l-4 ${config.dot.replace('bg-', 'border-')} p-4 flex flex-col justify-between">...</div>`; // Card content removed for brevity
+                board.innerHTML += card.replace('...', `<div><div class="flex justify-between items-start mb-2"><span class="text-xs font-semibold px-2.5 py-0.5 rounded-full ${config.color} ${config.textColor}">${config.text}</span><span class="text-xs font-medium text-gray-600 px-2 py-1 rounded-md ${groupColor}">${task.group}</span></div><h3 class="font-bold text-gray-800 text-lg mb-2">${task.task}</h3>${task.notes ? `<p class="text-sm text-gray-500 mb-3">${task.notes}</p>` : ''}</div><div class="mt-4 pt-3 border-t border-gray-200"><div class="flex items-center text-sm text-gray-600 mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-70"><path d="M12 2a5 5 0 1 0 5 5 5 5 0 0 0-5-5zM20 21a8 8 0 1 0-16 0"/></svg><strong>負責人：</strong><span class="ml-1">${task.owner}</span></div><div class="flex items-center text-sm text-gray-600"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 opacity-70"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg><strong>截止日：</strong><span class="ml-1">${task.dueDate ? task.dueDate.replace(/-/g, '/') : '未指定'}</span></div></div>`);
             });
         }
         
-        /**
-         * Populates the filter dropdowns with unique values from tasks.
-         */
         function populateFilters() {
             const groupFilter = document.getElementById('group-filter');
             const ownerFilter = document.getElementById('owner-filter');
-            
             const groups = [...new Set(tasks.map(task => task.group))];
             const owners = [...new Set(tasks.flatMap(task => task.owner.split(',').map(name => name.trim())))];
-            
-            groups.sort().forEach(group => {
-                groupFilter.innerHTML += `<option value="${group}">${group}</option>`;
-            });
-
-            owners.sort().forEach(owner => {
-                ownerFilter.innerHTML += `<option value="${owner}">${owner}</option>`;
-            });
+            groups.sort().forEach(group => { groupFilter.innerHTML += `<option value="${group}">${group}</option>`; });
+            owners.sort().forEach(owner => { ownerFilter.innerHTML += `<option value="${owner}">${owner}</option>`; });
         }
         
-        /**
-         * Sets up all event listeners for filter controls.
-         */
         function setupEventListeners() {
-            // Status filter buttons
-            const statusButtons = document.querySelectorAll('.filter-btn-status');
-            statusButtons.forEach(button => {
+            document.querySelectorAll('.filter-btn-status').forEach(button => {
                 button.addEventListener('click', () => {
-                    statusButtons.forEach(btn => {
-                        btn.classList.remove('bg-blue-500', 'text-white');
-                        btn.classList.add('bg-white', 'text-gray-700');
-                    });
+                    document.querySelectorAll('.filter-btn-status').forEach(btn => btn.classList.remove('bg-blue-500', 'text-white'));
                     button.classList.add('bg-blue-500', 'text-white');
-                    button.classList.remove('bg-white', 'text-gray-700');
                     currentFilters.status = button.dataset.filter;
                     renderTasks();
                 });
             });
-
-            // Dropdown filters
-            document.getElementById('group-filter').addEventListener('change', (e) => {
-                currentFilters.group = e.target.value;
-                renderTasks();
-            });
-
-            document.getElementById('owner-filter').addEventListener('change', (e) => {
-                currentFilters.owner = e.target.value;
-                renderTasks();
-            });
-
-            // Reset button
+            document.getElementById('group-filter').addEventListener('change', e => { currentFilters.group = e.target.value; renderTasks(); });
+            document.getElementById('owner-filter').addEventListener('change', e => { currentFilters.owner = e.target.value; renderTasks(); });
             document.getElementById('reset-filters').addEventListener('click', () => {
                 currentFilters = { status: 'all', group: 'all', owner: 'all' };
                 document.getElementById('group-filter').value = 'all';
                 document.getElementById('owner-filter').value = 'all';
-                document.querySelector('.filter-btn-status[data-filter="all"]').click(); // Simulate click to reset style
+                document.querySelector('.filter-btn-status[data-filter="all"]').click();
                 renderTasks();
             });
+            
+            // AI Modal listeners
+            const aiModal = document.getElementById('ai-modal');
+            document.getElementById('ai-button').addEventListener('click', () => {
+                generateAIReport();
+                aiModal.classList.remove('hidden');
+            });
+            document.getElementById('close-modal-button').addEventListener('click', () => aiModal.classList.add('hidden'));
+            aiModal.addEventListener('click', (e) => {
+                if (e.target === aiModal) {
+                    aiModal.classList.add('hidden');
+                }
+            });
+        }
+
+        function generateAIReport() {
+            const contentEl = document.getElementById('ai-modal-content');
+            
+            const statusCounts = tasks.reduce((acc, task) => {
+                const status = getStatus(task);
+                acc[status] = (acc[status] || 0) + 1;
+                return acc;
+            }, {});
+
+            const overdueTasks = tasks.filter(t => getStatus(t) === 'Overdue');
+            const flagshipTasks = tasks.filter(t => t.task.includes('TMAC') || t.task.includes('Power Apps'));
+            const quickWinTasks = tasks.filter(t => getStatus(t) === 'In Progress' && ((new Date(t.dueDate) - TODAY) / (1000 * 60 * 60 * 24)) <= 14);
+
+            let reportHTML = `
+                <h2>高階經理人決策摘要 (數據更新至 ${TODAY.toLocaleDateString('zh-TW')})</h2>
+                <h3>1. 專案組合健康度速覽 (RAG 分析)</h3>
+                <p>
+                    目前專案組合共計 ${tasks.length} 項，整體健康度尚可，但需關注特定風險。
+                    <ul>
+                        <li><strong class="text-red-600">紅色警示 (Red):</strong> 共 ${statusCounts['Overdue'] || 0} 項專案已逾期，需立即介入。</li>
+                        <li><strong class="text-yellow-600">黃色觀察 (Amber):</strong> 共 ${statusCounts['In Progress'] || 0} 項專案在進行中，應持續追蹤進度。</li>
+                        <li><strong class="text-blue-600">綠色正常 (Green):</strong> 共 ${statusCounts['Not Started'] || 0} 項專案尚未開始，資源規劃中。</li>
+                        <li><strong class="text-green-700">已完成 (Completed):</strong> 共 ${statusCounts['Completed'] || 0} 項，成果可進行覆盤。</li>
+                    </ul>
+                </p>
+
+                <h3>2. 核心專案與策略契合度分析</h3>
+                <p>從策略高度檢視，以下專案群組具備關鍵價值：</p>
+                <ul>
+                    <li><strong>策略核心 (Flagship Projects):</strong>
+                        <ul>
+                            <li><strong>醫學院評鑑 (TMAC):</strong> 此為合規與聲譽的基石專案，具備最高優先級。資源需絕對保障，確保順利通過。 (關聯任務: ${flagshipTasks.filter(t => t.task.includes('TMAC')).length}項)</li>
+                            <li><strong>數位轉型 (Digitalization):</strong> 「Power Apps 設計課程」是推動組織數位賦能的關鍵一步，具備高策略價值，能提升長期營運效率。</li>
+                        </ul>
+                    </li>
+                    <li><strong>近期戰果 (Quick Wins):</strong>
+                        ${quickWinTasks.length > 0 ? `「${quickWinTasks.map(t => t.task).join('」、「')}」等 ${quickWinTasks.length} 項任務將在兩週內到期，可作為短期成果亮點，激勵團隊士氣。` : '目前無即將在兩週內到期的專案可作為快速戰果。'}
+                    </li>
+                </ul>
+                
+                <h3>3. 風險評估與「殭屍專案」預警</h3>
+                <p>部分專案已呈現風險，需啟動管理機制：</p>
+                <ul>
+                    <li><strong class="text-red-600">已逾期專案 (立即處理):</strong> 
+                        ${overdueTasks.length > 0 ? `「${overdueTasks.map(t => t.task).join('」、「')}」已過期，必須立即與負責人 (${overdueTasks.map(t => t.owner).join(', ')}) 確認狀況，判斷是資源問題、範疇問題還是已成「殭屍專案」，並果斷決策（資源加碼或停損）。` : '目前無逾期專案，風險控制良好。'}
+                    </li>
+                     <li><strong>資源集中風險:</strong> 「實習醫學生訓練」小組負責多達 5 項專案，且多項將於6-7月密集到期，需注意團隊是否有過勞風險，考慮資源是否需臨時調度支援。</li>
+                </ul>
+
+                <h3>4. 高階經理人決策建議</h3>
+                <ol class="list-decimal list-inside space-y-2">
+                    <li><strong>設定明確優先級:</strong> 立即將所有「TMAC評鑑」相關任務標定為最高優先級。建議召開一次跨組別的評鑑專案啟動會議，確保共識與資源到位。</li>
+                    <li><strong>啟動風險排除會議:</strong> 針對 ${overdueTasks.length > 0 ? `「${overdueTasks[0].task}」` : '逾期專案'}，要求負責人於48小時內提出狀況說明與解決方案。</li>
+                    <li><strong>賦能數位轉型:</strong> 對於「Power Apps 課程」給予公開支持，並評估後續成果是否能拓展至更多行政流程，將其打造成內部數位化的成功案例。</li>
+                    <li><strong>建立常態回報機制:</strong> 要求各組負責人，自下月起，於每月會議前提交一份「RAG燈號進度表」，讓儀表板數據成為常態管理工具，而非僅是會議資料。</li>
+                </ol>
+            `;
+            contentEl.innerHTML = reportHTML;
         }
 
         function updateTimestamp() {
@@ -320,15 +346,12 @@
             timestampEl.textContent = `最後更新：${formattedDate}`;
         }
 
-        // --- INITIALIZATION ---
         document.addEventListener('DOMContentLoaded', () => {
             populateFilters();
             renderTasks();
             setupEventListeners();
             updateTimestamp();
         });
-
     </script>
-
 </body>
 </html>
